@@ -1,0 +1,7 @@
+prefix: "go.yhsif.com"
+
+mappings:
+  - path: /vanity
+    url: https://github.com/fishy/go-vanity
+  - path: /url2epub
+    url: https://github.com/fishy/url2epub
