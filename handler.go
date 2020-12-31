@@ -17,10 +17,10 @@ const MetaTemplateLine = `<meta name="go-import" content="{{.Prefix}}{{.Path}} {
 // must exists in the template, or the vanity page might be invalid.
 //
 // The data used to execute the template is defined in VanityData.
-var PageTmpl = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
+var PageTmpl Templater = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
 <html>
 <head>
-<title>Vanity page for {{.Prefix}}{{.Reqpath}}</title>">
+<title>Vanity page for {{.Prefix}}{{.Reqpath}}</title>
 ` + MetaTemplateLine + `
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="refresh" content="0; url=https://pkg.go.dev/{{.Prefix}}{{.Reqpath}}">
@@ -49,8 +49,6 @@ type PageTmplData struct {
 // Args defines the args used by Handler function.
 type Args struct {
 	Config Config
-
-	// TODO: Add index page handling.
 }
 
 // Handler creates an HTTP handler that handles go vanity URL requests.
@@ -61,8 +59,14 @@ func Handler(args Args) http.HandlerFunc {
 			args.Config.Mappings[i].Path = "/" + args.Config.Mappings[i].Path
 		}
 	}
+	indexHandler := IndexHandler(args)
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			indexHandler(w, r)
+			return
+		}
+
 		for _, m := range args.Config.Mappings {
 			if r.URL.Path != m.Path && !strings.HasPrefix(r.URL.Path, m.Path+"/") {
 				continue
@@ -78,7 +82,6 @@ func Handler(args Args) http.HandlerFunc {
 			return
 		}
 		// No mapping found, return 404.
-		// TODO: Add index page handling.
 		http.NotFound(w, r)
 	}
 }

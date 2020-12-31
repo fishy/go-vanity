@@ -3,5 +3,8 @@ prefix: "go.yhsif.com"
 mappings:
   - path: /vanity
     url: https://github.com/fishy/go-vanity
+    description: ""
+
   - path: /url2epub
     url: https://github.com/fishy/url2epub
+    description: ""

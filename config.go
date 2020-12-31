@@ -40,6 +40,9 @@ type Mapping struct {
 
 	// The VCS of the repository. Default to DefaultVCS ("git").
 	VCS VCS `yaml:"vcs" json:"vcs"`
+
+	// A brief description to be shown on the index page.
+	Description string `yaml:"description" json:"description"`
 }
 
 // The default VCS to be used.
