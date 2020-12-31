@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
+	"github.com/blendle/zapdriver"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	yaml "gopkg.in/yaml.v2"
 
 	"go.yhsif.com/vanity"
@@ -13,11 +15,15 @@ import (
 
 const configFile = "config.yaml"
 
-// AppEngine log will auto add date and time, so there's no need to double log
-// them in our own logger.
-var logger = log.New(os.Stdout, "", log.Lshortfile)
-
 func main() {
+	zapcfg := zapdriver.NewProductionConfig()
+	zapcfg.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
+	logger, err := zapcfg.Build(zapdriver.WrapCore())
+	if err != nil {
+		panic(err)
+	}
+	zap.ReplaceGlobals(logger)
+
 	cfg := loadConfig(configFile)
 
 	http.Handle("/", vanity.Handler(vanity.Args{
@@ -27,25 +33,45 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		logger.Printf("Defaulting to port %s", port)
+		zap.S().Warnw(
+			"Using default port",
+			"port", port,
+		)
 	}
-	logger.Printf("Listening on port %s", port)
+	zap.S().Infow(
+		"Started listening",
+		"port", port,
+	)
 
-	logger.Print(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	zap.S().Errorw(
+		"HTTP server returned",
+		"err", http.ListenAndServe(fmt.Sprintf(":%s", port), nil),
+	)
 }
 
 func loadConfig(path string) vanity.Config {
 	f, err := os.Open(path)
 	if err != nil {
-		logger.Panic(err)
+		zap.S().Fatalw(
+			"Unable to open config file",
+			"path", path,
+			"err", err,
+		)
 	}
 	defer f.Close()
 	decoder := yaml.NewDecoder(f)
 	decoder.SetStrict(true)
 	var cfg vanity.Config
 	if err := decoder.Decode(&cfg); err != nil {
-		logger.Panic(err)
+		zap.S().Fatalw(
+			"Unable to decode config file",
+			"err", err,
+		)
 	}
-	logger.Printf("Config: %#v", cfg)
+
+	zap.S().Infow(
+		"Loaded config",
+		"config", cfg,
+	)
 	return cfg
 }
