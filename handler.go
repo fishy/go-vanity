@@ -6,26 +6,44 @@ import (
 	"strings"
 )
 
-var vanityTmpl = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
+// MetaTemplateLine is the html->head->meta line that must exist in vanity
+// page html template.
+const MetaTemplateLine = `<meta name="go-import" content="{{.Prefix}}{{.Path}} {{.VCS}} {{.URL}}">`
+
+// PageTmpl is the html template used to render the vanity pages.
+//
+// It's exported so users of this package could replace it to a different one if
+// they so desire. But when replacing it, MetaTemplateLine (or equivalent)
+// must exists in the template, or the vanity page might be invalid.
+//
+// The data used to execute the template is defined in VanityData.
+var PageTmpl = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
 <html>
 <head>
-<title>Vanity page for {{.Prefix}}{{.Path}}{{.Subpath}}</title>">
+<title>Vanity page for {{.Prefix}}{{.Reqpath}}</title>">
+` + MetaTemplateLine + `
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<meta name="go-import" content="{{.Prefix}}{{.Path}} {{.VCS}} {{.URL}}">
-<meta http-equiv="refresh" content="0; url=https://pkg.go.dev/{{.Prefix}}{{.Path}}{{.Subpath}}">
+<meta http-equiv="refresh" content="0; url=https://pkg.go.dev/{{.Prefix}}{{.Reqpath}}">
 </head>
 <body><p>
-Nothing to see here, <a href="https://pkg.go.dev/{{.Prefix}}{{.Path}}{{.Subpath}}">move along</a>.
+Nothing to see here, <a href="https://pkg.go.dev/{{.Prefix}}{{.Reqpath}}">move along</a>.
 </p></body>
 </html>
 `))
 
-type vanityData struct {
-	Prefix  string
-	Path    string
-	URL     string
-	VCS     VCS
-	Subpath string
+// PageTmplData is the data used to execute PageTmpl.
+type PageTmplData struct {
+	// From configured prefix
+	Prefix string
+
+	// From configured mapping
+	Path string
+	URL  string
+	VCS  VCS
+
+	// The path from the request,
+	// could be different from Path but always have Path as prefix.
+	Reqpath string
 }
 
 // Args defines the args used by Handler function.
@@ -46,21 +64,17 @@ func Handler(args Args) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		for _, m := range args.Config.Mappings {
-			if !strings.HasPrefix(r.URL.Path, m.Path) {
-				continue
-			}
-			// We also don't want to handle /foobar requests with /foo mapping.
 			if r.URL.Path != m.Path && !strings.HasPrefix(r.URL.Path, m.Path+"/") {
 				continue
 			}
-			data := vanityData{
+			data := PageTmplData{
 				Prefix:  args.Config.Prefix,
 				Path:    m.Path,
 				URL:     m.URL,
 				VCS:     m.VCS,
-				Subpath: strings.TrimPrefix(r.URL.Path, m.Path),
+				Reqpath: r.URL.Path,
 			}
-			vanityTmpl.Execute(w, data)
+			PageTmpl.Execute(w, data)
 			return
 		}
 		// No mapping found, return 404.
