@@ -4,7 +4,36 @@ mappings:
   - path: /vanity
     url: https://github.com/fishy/go-vanity
     description: ""
+    unlist: true
 
   - path: /url2epub
     url: https://github.com/fishy/url2epub
     description: ""
+
+index: |
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <title>My awesome go libraries</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+  <h1>Welcome to my awesome go libraries!</h1>
+  {{if .Mappings}}
+  <ul>
+  {{range $mapping := .Mappings}}
+  {{if $mapping.HideInIndex -}}
+  {{else -}}
+  <li><a href="https://pkg.go.dev/{{$.Prefix}}{{$mapping.Path}}"><code>{{$.Prefix}}{{$mapping.Path}}</code></a>: (<a href="{{$mapping.URL}}">src</a>)
+  {{- if $mapping.Description -}}
+  &nbsp;{{$mapping.Description}}
+  {{- end -}}
+  </li>
+  {{- end}}
+  {{- end}}
+  </ul>
+  {{else}}
+  <p>Nothing to see here. Come back later.</p>
+  {{- end}}
+  </body>
+  </html>

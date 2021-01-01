@@ -43,6 +43,9 @@ type Mapping struct {
 
 	// A brief description to be shown on the index page.
 	Description string `yaml:"description" json:"description"`
+
+	// If set to true, do not show this mapping in index page.
+	HideInIndex bool `yaml:"unlist" json:"unlist"`
 }
 
 // The default VCS to be used.

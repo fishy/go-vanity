@@ -21,11 +21,14 @@ var IndexTmpl Templater = template.Must(template.New("index").Parse(`<!DOCTYPE h
 {{if .Mappings}}
 <ul>
 {{range $mapping := .Mappings}}
+{{if $mapping.HideInIndex -}}
+{{else -}}
 <li><a href="https://pkg.go.dev/{{$.Prefix}}{{$mapping.Path}}"><code>{{$.Prefix}}{{$mapping.Path}}</code></a>: (<a href="{{$mapping.URL}}">src</a>)
 {{- if $mapping.Description -}}
 &nbsp;{{$mapping.Description}}
 {{- end -}}
 </li>
+{{- end}}
 {{- end}}
 </ul>
 {{else}}
