@@ -16,7 +16,7 @@ const MetaTemplateLine = `<meta name="go-import" content="{{.Prefix}}{{.Path}} {
 // they so desire. But when replacing it, MetaTemplateLine (or equivalent)
 // must exists in the template, or the vanity page might be invalid.
 //
-// The data used to execute the template is defined in VanityData.
+// The data used to execute the template is defined in PageTmplData.
 var PageTmpl Templater = template.Must(template.New("vanity").Parse(`<!DOCTYPE html>
 <html>
 <head>
@@ -33,10 +33,10 @@ Nothing to see here, <a href="https://pkg.go.dev/{{.Prefix}}{{.Reqpath}}">move a
 
 // PageTmplData is the data used to execute PageTmpl.
 type PageTmplData struct {
-	// From configured prefix
+	// From Config.Prefix.
 	Prefix string
 
-	// From configured mapping
+	// From Config.Mappings
 	Path string
 	URL  string
 	VCS  VCS
@@ -49,6 +49,9 @@ type PageTmplData struct {
 // Args defines the args used by Handler function.
 type Args struct {
 	Config Config
+
+	// If set to true, do not render and handle the index page.
+	NoIndex bool
 }
 
 // Handler creates an HTTP handler that handles go vanity URL requests.
@@ -62,7 +65,7 @@ func Handler(args Args) http.HandlerFunc {
 	indexHandler := IndexHandler(args)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
+		if !args.NoIndex && r.URL.Path == "/" {
 			indexHandler(w, r)
 			return
 		}

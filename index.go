@@ -36,6 +36,10 @@ var IndexTmpl Templater = template.Must(template.New("index").Parse(`<!DOCTYPE h
 `))
 
 // IndexHandler creates a handler to render the index page.
+//
+// Note that by default this is already included in Handler so you don't need to
+// use it directly. It's provided, along with Args.NoIndex, so that you could
+// put the index page on a different path.
 func IndexHandler(args Args) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		IndexTmpl.Execute(w, args.Config)
