@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 
@@ -15,6 +16,12 @@ import (
 
 const configFile = "config.yaml"
 
+type config struct {
+	Config vanity.Config `yaml:",inline"`
+
+	IndexTemplate string `yaml:"index,omitempty"`
+}
+
 func main() {
 	zapcfg := zapdriver.NewProductionConfig()
 	zapcfg.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
@@ -26,8 +33,25 @@ func main() {
 
 	cfg := loadConfig(configFile)
 
+	if cfg.IndexTemplate != "" {
+		var err error
+		vanity.IndexTmpl, err = template.New("index").Parse(cfg.IndexTemplate)
+		if err != nil {
+			zap.S().Fatalw(
+				"Invalid index template",
+				"err", err,
+			)
+		}
+	}
+
+	http.HandleFunc(
+		"/_ah/health",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, "healthy")
+		},
+	)
 	http.Handle("/", vanity.Handler(vanity.Args{
-		Config: cfg,
+		Config: cfg.Config,
 	}))
 
 	port := os.Getenv("PORT")
@@ -49,7 +73,7 @@ func main() {
 	)
 }
 
-func loadConfig(path string) vanity.Config {
+func loadConfig(path string) config {
 	f, err := os.Open(path)
 	if err != nil {
 		zap.S().Fatalw(
@@ -61,7 +85,7 @@ func loadConfig(path string) vanity.Config {
 	defer f.Close()
 	decoder := yaml.NewDecoder(f)
 	decoder.SetStrict(true)
-	var cfg vanity.Config
+	var cfg config
 	if err := decoder.Decode(&cfg); err != nil {
 		zap.S().Fatalw(
 			"Unable to decode config file",
