@@ -46,6 +46,5 @@ var IndexTmpl Templater = template.Must(template.New("index").Parse(`<!DOCTYPE h
 func IndexHandler(args Args) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		IndexTmpl.Execute(w, args.Config)
-		return
 	}
 }

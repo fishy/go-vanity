@@ -9,7 +9,7 @@ import (
 // Templater is the minimal interface shared between go's text and html
 // templates.
 type Templater interface {
-	Execute(io.Writer, interface{}) error
+	Execute(io.Writer, any) error
 }
 
 var (
