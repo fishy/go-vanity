@@ -4,7 +4,6 @@ FROM golang:1.19 as build
 WORKDIR /go/src/app
 COPY . .
 
-RUN go mod download
 RUN go vet ./...
 RUN go test ./...
 

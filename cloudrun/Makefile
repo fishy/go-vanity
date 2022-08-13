@@ -12,6 +12,7 @@ docker_image=$(region)-docker.pkg.dev/$(project)/$(image)/$(image)
 .PHONY: deploy
 
 deploy:
+	go mod vendor
 	@echo Building $(docker_image)...
 	$(gcloud) builds submit --tag $(docker_image)
 	@echo Pushing to Google Cloud Run...
@@ -19,3 +20,4 @@ deploy:
 		--platform managed \
 		--allow-unauthenticated \
 		--region $(region) $(cloudrunname)
+	rm -Rf vendor
