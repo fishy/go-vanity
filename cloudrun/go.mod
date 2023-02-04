@@ -1,10 +1,10 @@
 module go.yhsif.com/vanity/cloudrun
 
-go 1.19
+go 1.20
 
 require (
 	github.com/blendle/zapdriver v1.3.1
-	go.uber.org/zap v1.22.0
+	go.uber.org/zap v1.24.0
 	go.yhsif.com/vanity v0.1.2
 	gopkg.in/yaml.v2 v2.4.0
 )
