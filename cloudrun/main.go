@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/blendle/zapdriver"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"go.yhsif.com/ctxslog"
+	"golang.org/x/exp/slog"
 	yaml "gopkg.in/yaml.v2"
 
 	"go.yhsif.com/vanity"
@@ -23,13 +22,14 @@ type config struct {
 }
 
 func main() {
-	zapcfg := zapdriver.NewProductionConfig()
-	zapcfg.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
-	logger, err := zapcfg.Build(zapdriver.WrapCore())
-	if err != nil {
-		panic(err)
-	}
-	zap.ReplaceGlobals(logger)
+	slog.SetDefault(slog.New(ctxslog.ContextHandler(slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelDebug,
+		ReplaceAttr: ctxslog.ChainReplaceAttr(
+			ctxslog.GCPKeys,
+			ctxslog.StringDuration,
+		),
+	}.NewJSONHandler(os.Stderr))))
 
 	cfg := loadConfig(configFile)
 
@@ -37,17 +37,18 @@ func main() {
 		var err error
 		vanity.IndexTmpl, err = template.New("index").Parse(cfg.IndexTemplate)
 		if err != nil {
-			zap.S().Fatalw(
+			slog.Error(
 				"Invalid index template",
 				"err", err,
 			)
+			os.Exit(1)
 		}
 	}
 
 	http.HandleFunc(
 		"/_ah/health",
 		func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, "healthy")
+			fmt.Fprintln(w, "healthy")
 		},
 	)
 	http.Handle("/", vanity.Handler(vanity.Args{
@@ -57,17 +58,17 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		zap.S().Warnw(
+		slog.Warn(
 			"Using default port",
 			"port", port,
 		)
 	}
-	zap.S().Infow(
+	slog.Info(
 		"Started listening",
 		"port", port,
 	)
 
-	zap.S().Errorw(
+	slog.Info(
 		"HTTP server returned",
 		"err", http.ListenAndServe(fmt.Sprintf(":%s", port), nil),
 	)
@@ -76,24 +77,26 @@ func main() {
 func loadConfig(path string) config {
 	f, err := os.Open(path)
 	if err != nil {
-		zap.S().Fatalw(
+		slog.Error(
 			"Unable to open config file",
-			"path", path,
 			"err", err,
+			"path", path,
 		)
+		os.Exit(1)
 	}
 	defer f.Close()
 	decoder := yaml.NewDecoder(f)
 	decoder.SetStrict(true)
 	var cfg config
 	if err := decoder.Decode(&cfg); err != nil {
-		zap.S().Fatalw(
+		slog.Error(
 			"Unable to decode config file",
 			"err", err,
 		)
+		os.Exit(1)
 	}
 
-	zap.S().Infow(
+	slog.Info(
 		"Loaded config",
 		"config", cfg,
 	)

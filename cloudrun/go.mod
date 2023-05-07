@@ -3,13 +3,8 @@ module go.yhsif.com/vanity/cloudrun
 go 1.20
 
 require (
-	github.com/blendle/zapdriver v1.3.1
-	go.uber.org/zap v1.24.0
+	go.yhsif.com/ctxslog v0.0.0-20230507055634-ffbf6dc5c1ba
 	go.yhsif.com/vanity v0.1.2
+	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
 	gopkg.in/yaml.v2 v2.4.0
-)
-
-require (
-	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
 )
