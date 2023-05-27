@@ -22,14 +22,14 @@ type config struct {
 }
 
 func main() {
-	slog.SetDefault(slog.New(ctxslog.ContextHandler(slog.HandlerOptions{
+	slog.SetDefault(slog.New(ctxslog.ContextHandler(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
 		ReplaceAttr: ctxslog.ChainReplaceAttr(
 			ctxslog.GCPKeys,
 			ctxslog.StringDuration,
 		),
-	}.NewJSONHandler(os.Stderr))))
+	}))))
 
 	cfg := loadConfig(configFile)
 
