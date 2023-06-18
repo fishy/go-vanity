@@ -1,5 +1,5 @@
-go.yhsif.com/ctxslog v0.0.0-20230527163140-c92ec9addc9c h1:ZHM+YFPO0bYaEPymaK+v469f+auErHsltarJfWojgLY=
-go.yhsif.com/ctxslog v0.0.0-20230527163140-c92ec9addc9c/go.mod h1:GZQJAL7ZnD9J9fhGWkny4jLns72AvT7K3eJXT0WMBgw=
+go.yhsif.com/ctxslog v0.0.0-20230618175150-3cf05cbd6262 h1:IlY/UowNA4AoXZKOZ40V91I0uBAovuzqFa2YG47qiiU=
+go.yhsif.com/ctxslog v0.0.0-20230618175150-3cf05cbd6262/go.mod h1:11SDKKujRL+Yhk8Sw/tPoRpzFYv18cYxl3eXxke1UR0=
 go.yhsif.com/vanity v0.1.2 h1:Ia5wjujbevI1g1Xm882CJHVzVbx407X/pk/hYVjeXS0=
 go.yhsif.com/vanity v0.1.2/go.mod h1:DGWqkfKqL2FxEMnQAibJrlH20boNsR+zF59in6kRrw4=
 golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 h1:k/i9J1pBpvlfR+9QsetwPyERsqu1GIbi967PQMq3Ivc=
