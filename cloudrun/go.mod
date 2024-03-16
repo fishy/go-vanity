@@ -1,6 +1,6 @@
 module go.yhsif.com/vanity/cloudrun
 
-go 1.21
+go 1.22
 
 require (
 	go.yhsif.com/ctxslog v1.0.0

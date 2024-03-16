@@ -19,5 +19,10 @@ deploy:
 	$(gcloud) run deploy --image $(docker_image) \
 		--platform managed \
 		--allow-unauthenticated \
-		--region $(region) $(cloudrunname)
+		--region $(region) $(cloudrunname) \
+		--execution-environment gen1 \
+		--concurrency 1 \
+		--cpu-throttling \
+		--cpu 0.1 \
+		--memory 128Mi
 	rm -Rf vendor
