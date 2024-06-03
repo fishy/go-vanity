@@ -22,7 +22,7 @@ type config struct {
 }
 
 func main() {
-	ctxslog.New(
+	slog.SetDefault(ctxslog.New(
 		ctxslog.WithAddSource(true),
 		ctxslog.WithLevel(slog.LevelDebug),
 		ctxslog.WithCallstack(slog.LevelError),
@@ -30,7 +30,7 @@ func main() {
 			ctxslog.GCPKeys,
 			ctxslog.StringDuration,
 		)),
-	)
+	))
 
 	cfg := loadConfig(configFile)
 
